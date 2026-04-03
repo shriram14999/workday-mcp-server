@@ -1,0 +1,154 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import {
+  getWorkers,
+  getWorkerById,
+  searchWorkers,
+  getWorkerProfile,
+  getOrganizations,
+  getJobProfiles,
+} from "../workday";
+
+export function registerWorkerTools(server: McpServer): void {
+  // ── List Workers ──────────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - MCP SDK deep type inference
+  server.tool(
+    "list_workers",
+    "List workers from Workday with optional pagination",
+    {
+      limit: z.number().min(1).max(100).optional().describe("Number of workers to return (max 100), default 10"),
+      offset: z.number().min(0).optional().describe("Number of records to skip for pagination, default 0"),
+    },
+    async ({ limit, offset }) => {
+      try {
+        const data = await getWorkers(limit ?? 10, offset ?? 0);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error listing workers: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ── Get Worker By ID ──────────────────────────────────────────────────────
+  server.tool(
+    "get_worker",
+    "Get detailed information about a specific Workday worker by their ID",
+    {
+      workerId: z.string().describe("The Workday worker ID"),
+    },
+    async ({ workerId }) => {
+      try {
+        const data = await getWorkerById(workerId);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error getting worker: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ── Search Workers ────────────────────────────────────────────────────────
+  server.tool(
+    "search_workers",
+    "Search for workers in Workday by name, email, or other keyword",
+    {
+      query: z.string().describe("Search term such as name or email"),
+      limit: z.number().min(1).max(50).optional().describe("Number of results to return, default 10"),
+    },
+    async ({ query, limit }) => {
+      try {
+        const data = await searchWorkers(query, limit ?? 10);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error searching workers: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ── Get Worker Profile ────────────────────────────────────────────────────
+  server.tool(
+    "get_worker_profile",
+    "Get the public profile of a Workday worker including their job title and contact info",
+    {
+      workerId: z.string().describe("The Workday worker ID"),
+    },
+    async ({ workerId }) => {
+      try {
+        const data = await getWorkerProfile(workerId);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error getting worker profile: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ── List Organizations ────────────────────────────────────────────────────
+  server.tool(
+    "list_organizations",
+    "List all organizations in Workday",
+    {
+      limit: z.number().min(1).max(100).optional().describe("Number of organizations to return, default 20"),
+    },
+    async ({ limit }) => {
+      try {
+        const data = await getOrganizations(limit ?? 20);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error listing organizations: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ── List Job Profiles ─────────────────────────────────────────────────────
+  server.tool(
+    "list_job_profiles",
+    "List all job profiles available in Workday",
+    {
+      limit: z.number().min(1).max(100).optional().describe("Number of job profiles to return, default 20"),
+    },
+    async ({ limit }) => {
+      try {
+        const data = await getJobProfiles(limit ?? 20);
+        return {
+          content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text", text: `Error listing job profiles: ${message}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+}

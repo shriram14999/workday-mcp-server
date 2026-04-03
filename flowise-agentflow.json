@@ -1,0 +1,302 @@
+{
+  "nodes": [
+    {
+      "id": "seqStart_0",
+      "position": { "x": 100, "y": 400 },
+      "type": "agentFlow",
+      "data": {
+        "id": "seqStart_0",
+        "label": "Start",
+        "version": 2,
+        "name": "seqStart",
+        "type": "Start",
+        "baseClasses": ["Start"],
+        "category": "Agent Flows",
+        "description": "Starting point of the agentflow",
+        "inputParams": [
+          {
+            "label": "Input Type",
+            "name": "startInputType",
+            "type": "options",
+            "options": [
+              { "label": "Chat Input", "name": "chatInput" }
+            ],
+            "default": "chatInput"
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "startInputType": "chatInput"
+        },
+        "outputAnchors": [
+          {
+            "id": "seqStart_0-output-seqStart",
+            "name": "seqStart",
+            "label": "Start",
+            "type": "Start"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "seqAgent_0",
+      "position": { "x": 550, "y": 400 },
+      "type": "agentFlow",
+      "data": {
+        "id": "seqAgent_0",
+        "label": "Agent",
+        "version": 5,
+        "name": "seqAgent",
+        "type": "Agent",
+        "baseClasses": ["Agent"],
+        "category": "Agent Flows",
+        "description": "Autonomous agent that uses LLM and tools to complete tasks",
+        "inputParams": [
+          {
+            "label": "System Prompt",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a helpful Workday HR assistant for Deloitte. You have access to Workday data through tools. Use these tools to answer questions about workers, organizations, and job profiles. Always be professional, accurate, and concise. When searching for workers, use their name or ID. When listing data, show the most relevant fields clearly.",
+            "optional": true,
+            "additionalParams": true
+          },
+          {
+            "label": "Human Prompt",
+            "name": "humanMessagePrompt",
+            "type": "string",
+            "rows": 4,
+            "default": "{input}",
+            "optional": true,
+            "additionalParams": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true
+          }
+        ],
+        "inputAnchors": [
+          {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "BaseChatModel"
+          },
+          {
+            "label": "Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true,
+            "optional": true
+          },
+          {
+            "label": "Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "optional": true
+          },
+          {
+            "label": "Input",
+            "name": "input",
+            "type": "conditionAgentFlow | loopAgentFlow | seqStart"
+          }
+        ],
+        "inputs": {
+          "systemMessagePrompt": "You are a helpful Workday HR assistant for Deloitte. You have access to Workday data through tools. Use these tools to answer questions about workers, organizations, and job profiles. Always be professional, accurate, and concise. When searching for workers, use their name or ID. When listing data, show the most relevant fields clearly.",
+          "humanMessagePrompt": "{input}",
+          "model": "{{chatOpenAI_0.data.instance}}",
+          "tools": ["{{mcpToolkit_0.data.instance}}"],
+          "input": "{{seqStart_0.data.instance}}"
+        },
+        "outputAnchors": [
+          {
+            "id": "seqAgent_0-output-seqAgent",
+            "name": "seqAgent",
+            "label": "Agent",
+            "type": "Agent"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "seqEnd_0",
+      "position": { "x": 1000, "y": 400 },
+      "type": "agentFlow",
+      "data": {
+        "id": "seqEnd_0",
+        "label": "End",
+        "version": 2,
+        "name": "seqEnd",
+        "type": "End",
+        "baseClasses": ["End"],
+        "category": "Agent Flows",
+        "description": "End node of the agentflow",
+        "inputParams": [
+          {
+            "label": "End Output",
+            "name": "endOutputType",
+            "type": "options",
+            "options": [
+              { "label": "Chat Output", "name": "chatOutput" }
+            ],
+            "default": "chatOutput"
+          }
+        ],
+        "inputAnchors": [
+          {
+            "label": "Input",
+            "name": "input",
+            "type": "conditionAgentFlow | loopAgentFlow | seqAgent"
+          }
+        ],
+        "inputs": {
+          "endOutputType": "chatOutput",
+          "input": "{{seqAgent_0.data.instance}}"
+        },
+        "outputAnchors": [],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "chatOpenAI_0",
+      "position": { "x": 550, "y": 100 },
+      "type": "customNode",
+      "data": {
+        "id": "chatOpenAI_0",
+        "label": "ChatOpenAI",
+        "version": 8,
+        "name": "chatOpenAI",
+        "type": "ChatOpenAI",
+        "baseClasses": ["ChatOpenAI", "BaseChatModel", "BaseLanguageModel"],
+        "category": "Chat Models",
+        "description": "Wrapper around OpenAI large language models",
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openAIApi"]
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "asyncOptions",
+            "default": "gpt-4o",
+            "optional": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "default": 0.1,
+            "optional": true
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "modelName": "gpt-4o",
+          "temperature": 0.1
+        },
+        "outputAnchors": [
+          {
+            "id": "chatOpenAI_0-output-chatOpenAI-ChatOpenAI|BaseChatModel|BaseLanguageModel",
+            "name": "chatOpenAI",
+            "label": "ChatOpenAI",
+            "type": "ChatOpenAI | BaseChatModel | BaseLanguageModel"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "mcpToolkit_0",
+      "position": { "x": 550, "y": 700 },
+      "type": "customNode",
+      "data": {
+        "id": "mcpToolkit_0",
+        "label": "MCP Tool",
+        "version": 1,
+        "name": "mcpToolkit",
+        "type": "McpToolkit",
+        "baseClasses": ["McpToolkit", "Tool", "BaseTool"],
+        "category": "Tools",
+        "description": "Connect to an MCP server and use its tools",
+        "inputParams": [
+          {
+            "label": "MCP Server Config",
+            "name": "mcpServerConfig",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true
+          },
+          {
+            "label": "SSE URL",
+            "name": "sseUrl",
+            "type": "string",
+            "optional": true,
+            "placeholder": "http://localhost:3001/sse"
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "sseUrl": "http://localhost:3001/sse"
+        },
+        "outputAnchors": [
+          {
+            "id": "mcpToolkit_0-output-mcpToolkit-McpToolkit|Tool|BaseTool",
+            "name": "mcpToolkit",
+            "label": "MCP Tool",
+            "type": "McpToolkit | Tool | BaseTool"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "seqStart_0",
+      "sourceHandle": "seqStart_0-output-seqStart",
+      "target": "seqAgent_0",
+      "targetHandle": "seqAgent_0-input-input-conditionAgentFlow|loopAgentFlow|seqStart",
+      "type": "agentEdge",
+      "id": "seqStart_0-seqAgent_0"
+    },
+    {
+      "source": "seqAgent_0",
+      "sourceHandle": "seqAgent_0-output-seqAgent",
+      "target": "seqEnd_0",
+      "targetHandle": "seqEnd_0-input-input-conditionAgentFlow|loopAgentFlow|seqAgent",
+      "type": "agentEdge",
+      "id": "seqAgent_0-seqEnd_0"
+    },
+    {
+      "source": "chatOpenAI_0",
+      "sourceHandle": "chatOpenAI_0-output-chatOpenAI-ChatOpenAI|BaseChatModel|BaseLanguageModel",
+      "target": "seqAgent_0",
+      "targetHandle": "seqAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenAI_0-seqAgent_0"
+    },
+    {
+      "source": "mcpToolkit_0",
+      "sourceHandle": "mcpToolkit_0-output-mcpToolkit-McpToolkit|Tool|BaseTool",
+      "target": "seqAgent_0",
+      "targetHandle": "seqAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "mcpToolkit_0-seqAgent_0"
+    }
+  ],
+  "metadata": {
+    "flowType": "AGENTFLOW"
+  }
+}

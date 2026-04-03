@@ -1,0 +1,250 @@
+{
+  "nodes": [
+    {
+      "id": "chatOpenAI_0",
+      "position": { "x": 100, "y": 300 },
+      "type": "customNode",
+      "data": {
+        "id": "chatOpenAI_0",
+        "label": "ChatOpenAI",
+        "version": 6,
+        "name": "chatOpenAI",
+        "type": "ChatOpenAI",
+        "baseClasses": ["ChatOpenAI", "BaseChatModel", "BaseLanguageModel"],
+        "category": "Chat Models",
+        "description": "Wrapper around OpenAI large language models",
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openAIApi"]
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "options",
+            "options": [
+              { "label": "gpt-4o", "name": "gpt-4o" },
+              { "label": "gpt-4o-mini", "name": "gpt-4o-mini" }
+            ],
+            "default": "gpt-4o",
+            "optional": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "default": 0.1,
+            "optional": true
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "modelName": "gpt-4o",
+          "temperature": 0.1
+        },
+        "outputAnchors": [
+          {
+            "id": "chatOpenAI_0-output-chatOpenAI-ChatOpenAI|BaseChatModel|BaseLanguageModel",
+            "name": "chatOpenAI",
+            "label": "ChatOpenAI",
+            "description": "Wrapper around OpenAI large language models",
+            "type": "ChatOpenAI | BaseChatModel | BaseLanguageModel"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "bufferMemory_0",
+      "position": { "x": 100, "y": 600 },
+      "type": "customNode",
+      "data": {
+        "id": "bufferMemory_0",
+        "label": "Buffer Memory",
+        "version": 2,
+        "name": "bufferMemory",
+        "type": "BufferMemory",
+        "baseClasses": ["BufferMemory", "BaseChatMemory", "BaseMemory"],
+        "category": "Memory",
+        "description": "Retrieve chat messages stored in memory array",
+        "inputParams": [
+          {
+            "label": "Memory Key",
+            "name": "memoryKey",
+            "type": "string",
+            "default": "chat_history"
+          },
+          {
+            "label": "Input Key",
+            "name": "inputKey",
+            "type": "string",
+            "default": "input"
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "memoryKey": "chat_history",
+          "inputKey": "input"
+        },
+        "outputAnchors": [
+          {
+            "id": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+            "name": "bufferMemory",
+            "label": "Buffer Memory",
+            "type": "BufferMemory | BaseChatMemory | BaseMemory"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "mcpToolkit_0",
+      "position": { "x": 500, "y": 200 },
+      "type": "customNode",
+      "data": {
+        "id": "mcpToolkit_0",
+        "label": "MCP Tool",
+        "version": 1,
+        "name": "mcpToolkit",
+        "type": "McpToolkit",
+        "baseClasses": ["McpToolkit", "BaseTool"],
+        "category": "Tools",
+        "description": "Connect to an MCP Server and use its tools",
+        "inputParams": [
+          {
+            "label": "MCP Server URL (SSE)",
+            "name": "mcpServerUrl",
+            "type": "string",
+            "placeholder": "http://localhost:3001/sse"
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "mcpServerUrl": "http://localhost:3001/sse"
+        },
+        "outputAnchors": [
+          {
+            "id": "mcpToolkit_0-output-mcpToolkit-McpToolkit|BaseTool",
+            "name": "mcpToolkit",
+            "label": "MCP Tool",
+            "type": "McpToolkit | BaseTool"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    },
+    {
+      "id": "toolAgent_0",
+      "position": { "x": 900, "y": 400 },
+      "type": "customNode",
+      "data": {
+        "id": "toolAgent_0",
+        "label": "Tool Agent",
+        "version": 2,
+        "name": "toolAgent",
+        "type": "ToolAgent",
+        "baseClasses": ["ToolAgent", "AgentExecutor", "BaseChain"],
+        "category": "Agents",
+        "description": "Agent that uses Tools to answer questions",
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "rows": 4,
+            "default": "You are a helpful Workday HR assistant. You have access to Workday data including workers, organizations, and job profiles. Use the available tools to answer questions about employees and HR data. Always be professional and accurate.",
+            "optional": true,
+            "additionalParams": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true
+          }
+        ],
+        "inputAnchors": [
+          {
+            "label": "Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true
+          },
+          {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "BaseChatModel"
+          },
+          {
+            "label": "Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "optional": true
+          }
+        ],
+        "inputs": {
+          "systemMessage": "You are a helpful Workday HR assistant. You have access to Workday data including workers, organizations, and job profiles. Use the available tools to answer questions about employees and HR data. Always be professional and accurate.",
+          "tools": ["{{mcpToolkit_0.data.instance}}"],
+          "model": "{{chatOpenAI_0.data.instance}}",
+          "memory": "{{bufferMemory_0.data.instance}}"
+        },
+        "outputAnchors": [
+          {
+            "id": "toolAgent_0-output-toolAgent-ToolAgent|AgentExecutor|BaseChain",
+            "name": "toolAgent",
+            "label": "Tool Agent",
+            "type": "ToolAgent | AgentExecutor | BaseChain"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "chatOpenAI_0",
+      "sourceHandle": "chatOpenAI_0-output-chatOpenAI-ChatOpenAI|BaseChatModel|BaseLanguageModel",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenAI_0-chatOpenAI_0-output-chatOpenAI-ChatOpenAI|BaseChatModel|BaseLanguageModel-toolAgent_0-toolAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "bufferMemory_0",
+      "sourceHandle": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-memory-BaseChatMemory",
+      "type": "buttonedge",
+      "id": "bufferMemory_0-bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory-toolAgent_0-toolAgent_0-input-memory-BaseChatMemory"
+    },
+    {
+      "source": "mcpToolkit_0",
+      "sourceHandle": "mcpToolkit_0-output-mcpToolkit-McpToolkit|BaseTool",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "mcpToolkit_0-mcpToolkit_0-output-mcpToolkit-McpToolkit|BaseTool-toolAgent_0-toolAgent_0-input-tools-Tool"
+    }
+  ],
+  "chatflow": {
+    "id": "workday-asor-chatflow",
+    "name": "Workday ASOR HR Assistant",
+    "flowData": "{}",
+    "deployed": false,
+    "isPublic": false,
+    "apikeyid": "",
+    "chatbotConfig": "",
+    "apiConfig": "",
+    "analytic": "",
+    "speechToText": "",
+    "category": "",
+    "type": "CHATFLOW"
+  }
+}
