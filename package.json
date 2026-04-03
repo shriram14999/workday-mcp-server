@@ -1,6 +1,6 @@
 {
   "name": "workday-asor-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Workday ASOR MCP Server with OAuth 2.0 for Flowise and Cursor",
   "main": "dist/index.js",
   "bin": {

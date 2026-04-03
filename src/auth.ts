@@ -35,9 +35,9 @@ let asorTokenStore: TokenStore | null = null;
 function saveTokensToFile(store: TokenStore): void {
   try {
     fs.writeFileSync(TOKEN_FILE, JSON.stringify(store, null, 2), "utf-8");
-    console.log(`✅ Tokens saved to ${TOKEN_FILE}`);
+    process.stderr.write(`✅ Tokens saved to ${TOKEN_FILE}\n`);
   } catch (err) {
-    console.error("⚠️  Could not save tokens to file:", err);
+    process.stderr.write(`⚠️  Could not save tokens to file: ${err}\n`);
   }
 }
 
@@ -49,11 +49,11 @@ export function loadTokensFromFile(): boolean {
     // Only load if refresh token exists (access token may be expired)
     if (store.refresh_token) {
       oauthTokenStore = store;
-      console.log("✅ Tokens loaded from file");
+      process.stderr.write("✅ Tokens loaded from file\n");
       return true;
     }
   } catch (err) {
-    console.error("⚠️  Could not load tokens from file:", err);
+    process.stderr.write(`⚠️  Could not load tokens from file: ${err}\n`);
   }
   return false;
 }
@@ -89,7 +89,7 @@ export async function exchangeCodeForTokens(code: string): Promise<void> {
     expires_at: Date.now() + response.data.expires_in * 1000,
   };
   saveTokensToFile(oauthTokenStore);
-  console.log("✅ OAuth tokens stored successfully");
+  process.stderr.write("✅ OAuth tokens stored successfully\n");
 }
 
 export async function getOAuthAccessToken(): Promise<string> {
@@ -100,7 +100,7 @@ export async function getOAuthAccessToken(): Promise<string> {
   }
 
   if (Date.now() >= oauthTokenStore.expires_at - 60000) {
-    console.log("🔄 Refreshing OAuth access token...");
+    process.stderr.write("🔄 Refreshing OAuth access token...\n");
     const response = await axios.post(
       WORKDAY_TOKEN_URL!,
       new URLSearchParams({
@@ -118,7 +118,7 @@ export async function getOAuthAccessToken(): Promise<string> {
       expires_at: Date.now() + response.data.expires_in * 1000,
     };
     saveTokensToFile(oauthTokenStore);
-    console.log("✅ OAuth token refreshed");
+    process.stderr.write("✅ OAuth token refreshed\n");
   }
 
   return oauthTokenStore.access_token;
@@ -134,7 +134,7 @@ export async function getAsorAccessToken(): Promise<string> {
     return asorTokenStore.access_token;
   }
 
-  console.log("🔄 Getting ASOR access token...");
+  process.stderr.write("🔄 Getting ASOR access token...\n");
   const response = await axios.post(
     WORKDAY_ASOR_TOKEN_URL!,
     new URLSearchParams({
@@ -150,7 +150,7 @@ export async function getAsorAccessToken(): Promise<string> {
     refresh_token: response.data.refresh_token || "",
     expires_at: Date.now() + (response.data.expires_in || 3600) * 1000,
   };
-  console.log("✅ ASOR token obtained");
+  process.stderr.write("✅ ASOR token obtained\n");
   return asorTokenStore.access_token;
 }
 
