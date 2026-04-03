@@ -8,6 +8,7 @@ import {
   getAuthorizationUrl,
   exchangeCodeForTokens,
   isOAuthAuthenticated,
+  injectRefreshToken,
 } from "./auth";
 import { registerWorkerTools } from "./tools/workers";
 
@@ -16,6 +17,13 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Load Workday refresh token from env var at startup (for Render/cloud deployment)
+const envRefreshToken = process.env.WORKDAY_REFRESH_TOKEN;
+if (envRefreshToken) {
+  injectRefreshToken(envRefreshToken);
+  process.stderr.write("✅ Workday refresh token loaded from environment\n");
+}
 
 // ─── MCP Server Setup ─────────────────────────────────────────────────────────
 const server = new McpServer({

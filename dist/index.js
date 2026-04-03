@@ -15,6 +15,12 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+// Load Workday refresh token from env var at startup (for Render/cloud deployment)
+const envRefreshToken = process.env.WORKDAY_REFRESH_TOKEN;
+if (envRefreshToken) {
+    (0, auth_1.injectRefreshToken)(envRefreshToken);
+    process.stderr.write("✅ Workday refresh token loaded from environment\n");
+}
 // ─── MCP Server Setup ─────────────────────────────────────────────────────────
 const server = new mcp_js_1.McpServer({
     name: "workday-asor-mcp",
