@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
 const sse_js_1 = require("@modelcontextprotocol/sdk/server/sse.js");
+const streamableHttp_js_1 = require("@modelcontextprotocol/sdk/server/streamableHttp.js");
 const auth_1 = require("./auth");
 const workers_1 = require("./tools/workers");
 dotenv_1.default.config();
@@ -103,11 +104,9 @@ function buildSuccessPage(port) {
 }
 // ─── MCP SSE Routes (used by Flowise / Cursor) ────────────────────────────────
 app.get("/sse", async (req, res) => {
-    console.log("📡 New SSE connection established");
     const transport = new sse_js_1.SSEServerTransport("/messages", res);
     transports.set(transport.sessionId, transport);
     res.on("close", () => {
-        console.log(`📡 SSE connection closed: ${transport.sessionId}`);
         transports.delete(transport.sessionId);
     });
     await server.connect(transport);
@@ -120,6 +119,14 @@ app.post("/messages", async (req, res) => {
         return;
     }
     await transport.handlePostMessage(req, res);
+});
+// ─── MCP Streamable HTTP Route (used by Flowise Cloud) ───────────────────────
+app.all("/mcp", async (req, res) => {
+    const transport = new streamableHttp_js_1.StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+    const mcpServer = new mcp_js_1.McpServer({ name: "workday-asor-mcp", version: "1.0.0" });
+    (0, workers_1.registerWorkerTools)(mcpServer);
+    await mcpServer.connect(transport);
+    await transport.handleRequest(req, res, req.body);
 });
 // ─── Health & Status Routes ───────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
