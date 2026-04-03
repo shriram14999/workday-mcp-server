@@ -1,8 +1,14 @@
 {
-  "name": "workday-mcp-server",
+  "name": "workday-asor-mcp",
   "version": "1.0.0",
-  "description": "Workday ASOR MCP Server with OAuth 2.0",
+  "description": "Workday ASOR MCP Server with OAuth 2.0 for Flowise and Cursor",
   "main": "dist/index.js",
+  "bin": {
+    "workday-asor-mcp": "dist/mcp-stdio.js"
+  },
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

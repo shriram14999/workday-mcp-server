@@ -9,6 +9,7 @@ exports.exchangeCodeForTokens = exchangeCodeForTokens;
 exports.getOAuthAccessToken = getOAuthAccessToken;
 exports.getAsorAccessToken = getAsorAccessToken;
 exports.isOAuthAuthenticated = isOAuthAuthenticated;
+exports.injectRefreshToken = injectRefreshToken;
 const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -116,5 +117,12 @@ async function getAsorAccessToken() {
 }
 function isOAuthAuthenticated() {
     return oauthTokenStore !== null;
+}
+function injectRefreshToken(refreshToken) {
+    oauthTokenStore = {
+        access_token: "",
+        refresh_token: refreshToken,
+        expires_at: 0, // Force refresh on first use
+    };
 }
 //# sourceMappingURL=auth.js.map

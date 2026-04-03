@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -10,12 +11,19 @@ const auth_1 = require("./auth");
 const workers_1 = require("./tools/workers");
 dotenv_1.default.config();
 async function main() {
-    // Load saved tokens from file (set by HTTP server after browser auth)
-    const loaded = (0, auth_1.loadTokensFromFile)();
-    if (!loaded) {
-        process.stderr.write("⚠️  No saved Workday tokens found.\n" +
-            "   Please authenticate first by visiting: http://localhost:3001/auth\n" +
-            "   Then restart Flowise or re-fetch the MCP tools.\n");
+    // Try loading refresh token from environment variable first (for cloud/Flowise Cloud use)
+    const envRefreshToken = process.env.WORKDAY_REFRESH_TOKEN;
+    if (envRefreshToken) {
+        process.stderr.write("✅ Using refresh token from environment variable\n");
+        (0, auth_1.injectRefreshToken)(envRefreshToken);
+    }
+    else {
+        // Fall back to file-based token (for local use)
+        const loaded = (0, auth_1.loadTokensFromFile)();
+        if (!loaded) {
+            process.stderr.write("⚠️  No Workday tokens found.\n" +
+                "   Set WORKDAY_REFRESH_TOKEN env var or authenticate at: http://localhost:3001/auth\n");
+        }
     }
     const server = new mcp_js_1.McpServer({
         name: "workday-asor-mcp",

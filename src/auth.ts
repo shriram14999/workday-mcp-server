@@ -157,3 +157,11 @@ export async function getAsorAccessToken(): Promise<string> {
 export function isOAuthAuthenticated(): boolean {
   return oauthTokenStore !== null;
 }
+
+export function injectRefreshToken(refreshToken: string): void {
+  oauthTokenStore = {
+    access_token: "",
+    refresh_token: refreshToken,
+    expires_at: 0, // Force refresh on first use
+  };
+}
